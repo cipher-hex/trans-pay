@@ -99,10 +99,9 @@ export const SimulationPreview: React.FC<SimulationPreviewProps> = ({
             {title}
           </div>
           <Button
-            variant="connectkit"
             size="sm"
             onClick={() => setShowDetailsDialog(true)}
-            className="h-6 p-2 text-xs hover:bg-secondary/10 bg-transparent rounded-full font-semibold"
+            className="h-6 p-2 text-xs bg-white text-[#2563EB] border border-[#2563EB] hover:bg-[#F3F4F6] transition-colors rounded-full font-semibold"
           >
             <Eye className="w-3 h-3 mr-1" />
             View Details
@@ -313,7 +312,7 @@ export const SimulationPreview: React.FC<SimulationPreviewProps> = ({
                     <span className="text-sm text-muted-foreground">
                       Solver Fee
                     </span>
-                    <span className="text-sm">
+                    <span className="text-sm text-[#2563EB]">
                       {formatCost(intent.fees.solver)} {intent.token?.symbol}
                     </span>
                   </div>
@@ -325,7 +324,7 @@ export const SimulationPreview: React.FC<SimulationPreviewProps> = ({
                       <span className="text-sm text-muted-foreground">
                         Protocol Fee
                       </span>
-                      <span className="text-sm">
+                      <span className="text-sm text-[#2563EB]">
                         {formatCost(intent.fees.protocol)}{" "}
                         {intent.token?.symbol}
                       </span>
@@ -338,7 +337,7 @@ export const SimulationPreview: React.FC<SimulationPreviewProps> = ({
                       <span className="text-sm text-muted-foreground">
                         Additional Gas
                       </span>
-                      <span className="text-sm">
+                      <span className="text-sm text-[#2563EB]">
                         {formatCost(intent.fees.gasSupplied)}{" "}
                         {intent.token?.symbol}
                       </span>

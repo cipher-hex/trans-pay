@@ -5,23 +5,23 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-[#4A90E2]/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
   {
     variants: {
       variant: {
         default:
-          "bg-[#4A90E2] text-white shadow-md hover:bg-[#3A7FD1] hover:shadow-lg",
+          "bg-[#2563EB] text-white shadow-md hover:bg-[#1D4ED8] hover:shadow-lg",
         destructive:
-          "bg-[#E74C3C] text-white shadow-md hover:bg-[#D63929] focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
+          "bg-[#EF4444] text-white shadow-md hover:bg-[#DC2626] focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
         outline:
-          "border-2 border-[#4A90E2] bg-white text-[#4A90E2] hover:bg-[#F0F7FF] hover:border-[#3A7FD1]",
+          "border-2 border-[#2563EB] bg-white text-[#2563EB] hover:bg-[#EFF6FF] hover:border-[#1D4ED8]",
         secondary:
-          "bg-[#7BB4E8] text-white shadow-sm hover:bg-[#6AA4DD]",
+          "bg-[#60A5FA] text-white shadow-sm hover:bg-[#3B82F6]",
         ghost:
-          "hover:bg-[#E6F3FF] hover:text-[#4A90E2]",
-        link: "text-[#4A90E2] underline-offset-4 hover:underline",
+          "hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+        link: "text-[#2563EB] underline-offset-4 hover:underline",
         connectkit:
-          "bg-[#4A90E2] text-white shadow-md rounded-xl hover:bg-[#3A7FD1] hover:shadow-lg active:shadow-sm text-base px-6 py-3",
+          "bg-[#2563EB] text-white shadow-md rounded-xl hover:bg-[#1D4ED8] hover:shadow-lg active:shadow-sm text-base px-6 py-3",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

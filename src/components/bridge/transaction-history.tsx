@@ -55,9 +55,8 @@ export const TransactionHistory: React.FC = () => {
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Bridge Assets</h3>
         <Button
-          variant="connectkit"
           onClick={() => setShowHistory(!showHistory)}
-          className="flex items-center gap-2 bg-accent-foreground"
+          className="flex items-center gap-2 bg-white text-[#2563EB] border border-[#2563EB] hover:bg-[#F3F4F6] transition-colors shadow-sm"
         >
           <History className="w-4 h-4" />
           History ({totalCount})

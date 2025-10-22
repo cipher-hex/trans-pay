@@ -25,8 +25,8 @@ const Header = ({ activeTab, onTabChange, isTestnet }: HeaderProps) => {
           <Link href="/" className="flex items-center gap-3">
             <Image src="/avail-logo.svg" alt="Nexus" width={136} height={126} />
             <div className="flex flex-col">
-              <span className="text-xl font-semibold text-[#1A3A52]">Nexus Upgrade</span>
-              <span className="text-xs text-[#5A7A94]">
+              <span className="text-xl font-semibold text-[#1E293B]">Nexus Upgrade</span>
+              <span className="text-xs text-[#64748B]">
                 Seamless cross-chain interactions
               </span>
             </div>
@@ -34,24 +34,26 @@ const Header = ({ activeTab, onTabChange, isTestnet }: HeaderProps) => {
           <ConnectWallet />
         </div>
         
-        <nav className="flex items-center gap-2 border-t border-[#E1ECF7] pt-4">
-          {tabs.map((tab) => (
-            <button
-              key={tab.value}
-              onClick={() => onTabChange(tab.value)}
-              className={`
-                px-6 py-3 rounded-xl font-medium transition-all duration-200
-                ${activeTab === tab.value
-                  ? 'bg-[#4A90E2] text-white shadow-md'
-                  : 'bg-[#F0F7FF] text-[#4A90E2] hover:bg-[#E6F3FF] hover:shadow-sm'
-                }
-              `}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <nav className="flex items-center justify-center gap-2 border-t border-[#E1ECF7] pt-4 relative">
+          <div className="flex items-center gap-2">
+            {tabs.map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => onTabChange(tab.value)}
+                className={`
+                  px-6 py-3 rounded-xl font-medium transition-all duration-200
+                  ${activeTab === tab.value
+                    ? 'bg-[#2563EB] text-white shadow-md'
+                    : 'bg-[#EFF6FF] text-[#2563EB] hover:bg-[#DBEAFE] hover:shadow-sm'
+                  }
+                `}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
           {isTestnet && (
-            <span className="ml-auto text-xs text-[#E74C3C] bg-[#FFE6E6] px-3 py-1 rounded-full">
+            <span className="absolute right-0 text-xs text-[#EF4444] bg-[#FEE2E2] px-3 py-1 rounded-full">
               Devnet Mode
             </span>
           )}
