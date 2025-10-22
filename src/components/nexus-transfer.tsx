@@ -12,8 +12,10 @@ import {
 } from "@avail-project/nexus-core";
 import ChainSelect from "./blocks/chain-select";
 import TokenSelect from "./blocks/token-select";
+import { SourceChainSelector } from "./blocks/source-chain-selector";
 import { useTransactionProgress } from "@/hooks/useTransactionProgress";
 import { useTransferTransaction } from "@/hooks/useTransferTransaction";
+import { useSourceChainBalances } from "@/hooks/useSourceChainBalances";
 import { SimulationPreview } from "./shared/simulation-preview";
 import IntentModal from "./nexus-modals/intent-modal";
 import AllowanceModal from "./nexus-modals/allowance-modal";
@@ -24,6 +26,7 @@ interface TransferState {
   recipientAddress: `0x${string}` | undefined;
   amount: string;
   isTransferring: boolean;
+  selectedSourceChains: number[];
 }
 
 const NexusTransfer = ({ isTestnet }: { isTestnet: boolean }) => {
@@ -33,6 +36,7 @@ const NexusTransfer = ({ isTestnet }: { isTestnet: boolean }) => {
     recipientAddress: undefined,
     amount: "",
     isTransferring: false,
+    selectedSourceChains: [],
   });
   const {
     nexusSdk,
@@ -49,6 +53,13 @@ const NexusTransfer = ({ isTestnet }: { isTestnet: boolean }) => {
     simulationError,
     triggerTransferSimulation,
   } = useTransferTransaction();
+
+  // Fetch available source chain balances
+  const { availableChains, isLoading: isLoadingBalances } = useSourceChainBalances({
+    selectedToken: state.selectedToken,
+    destinationChainId: state.selectedChain,
+    isTestnet,
+  });
 
   useTransactionProgress({
     transactionType: "transfer",
@@ -74,6 +85,7 @@ const NexusTransfer = ({ isTestnet }: { isTestnet: boolean }) => {
         amount: state.amount,
         chainId: state.selectedChain,
         recipient: state.recipientAddress,
+        sourceChains: state.selectedSourceChains.length > 0 ? state.selectedSourceChains : undefined,
       });
     }
   }, [
@@ -81,6 +93,7 @@ const NexusTransfer = ({ isTestnet }: { isTestnet: boolean }) => {
     state.amount,
     state.recipientAddress,
     state.selectedChain,
+    state.selectedSourceChains,
     triggerTransferSimulation,
   ]);
 
@@ -102,6 +115,10 @@ const NexusTransfer = ({ isTestnet }: { isTestnet: boolean }) => {
     setState({ ...state, recipientAddress: e.target.value as `0x${string}` });
   };
 
+  const handleSourceChainsChange = (chainIds: number[]) => {
+    setState({ ...state, selectedSourceChains: chainIds });
+  };
+
   const handleTransfer = async () => {
     if (
       !state.selectedToken ||
@@ -113,6 +130,20 @@ const NexusTransfer = ({ isTestnet }: { isTestnet: boolean }) => {
       return;
     }
 
+    // Validate source chain balance if specific chains are selected
+    if (state.selectedSourceChains.length > 0) {
+      const selectedChainsBalance = availableChains
+        .filter((chain) => state.selectedSourceChains.includes(chain.chainId))
+        .reduce((sum, chain) => sum + parseFloat(chain.balance || "0"), 0);
+
+      if (selectedChainsBalance < parseFloat(state.amount)) {
+        toast.error("Insufficient balance on selected source chains", {
+          description: `Available: ${selectedChainsBalance.toFixed(6)} ${state.selectedToken}`,
+        });
+        return;
+      }
+    }
+
     setState({ ...state, isTransferring: true });
 
     try {
@@ -121,6 +152,7 @@ const NexusTransfer = ({ isTestnet }: { isTestnet: boolean }) => {
         amount: state.amount,
         chainId: state.selectedChain,
         recipient: state.recipientAddress,
+        sourceChains: state.selectedSourceChains.length > 0 ? state.selectedSourceChains : undefined,
       });
 
       console.log("result", result);
@@ -155,6 +187,17 @@ const NexusTransfer = ({ isTestnet }: { isTestnet: boolean }) => {
           handleTokenSelect={handleTokenSelect}
           isTestnet={isTestnet}
         />
+        {/* Source Chain Selector - shown only when token is selected */}
+        {state.selectedToken && availableChains.length > 0 && (
+          <SourceChainSelector
+            availableChains={availableChains}
+            selectedChainIds={state.selectedSourceChains}
+            onSelectionChange={handleSourceChainsChange}
+            destinationChainId={state.selectedChain}
+            tokenSymbol={state.selectedToken}
+            disabled={isLoadingBalances}
+          />
+        )}
       </div>
       <div className="w-full flex items-center gap-x-2 shadow-[var(--ck-connectbutton-box-shadow)] rounded-[var(--ck-connectbutton-border-radius)]">
         <Input

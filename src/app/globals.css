@@ -67,10 +67,10 @@
     --ck-connectbutton-border-radius: 12px;
     --ck-connectbutton-hover-background: #1D4ED8;
     --ck-connectbutton-active-box-shadow: 0 1px 4px rgba(37, 99, 235, 0.2);
-    --ck-connectbutton-balance-color: #1E293B;
-    --ck-connectbutton-balance-background: #EFF6FF;
+    --ck-connectbutton-balance-color: #FFFFFF;
+    --ck-connectbutton-balance-background: #2563EB;
     --ck-connectbutton-balance-box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
-    --ck-connectbutton-balance-hover-background: #DBEAFE;
+    --ck-connectbutton-balance-hover-background: #374151;
     --ck-connectbutton-balance-connectbutton-box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
     --ck-connectbutton-balance-connectbutton-border-radius: 0px 12px 12px 0;
     --ck-primary-button-color: #FFFFFF;
@@ -87,14 +87,14 @@
     --ck-secondary-button-hover-box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3), inset 0 0 0 2px #2563EB;
     --ck-focus-color: #4A90E2;
     --ck-overlay-background: rgba(26, 58, 82, 0.6);
-    --ck-body-color: #1A3A52;
-    --ck-body-color-muted: rgba(26, 58, 82, 0.6);
-    --ck-body-color-muted-hover: #1A3A52;
-    --ck-body-background: #F5F9FF;
-    --ck-body-background-transparent: rgba(255, 255, 255, 0);
-    --ck-body-background-secondary: rgba(74, 144, 226, 0.1);
-    --ck-body-background-secondary-hover-background: #E6F3FF;
-    --ck-body-background-secondary-hover-outline: #4A90E2;
+    --ck-body-color: #1E293B;
+    --ck-body-color-muted: rgba(30, 41, 59, 0.6);
+    --ck-body-color-muted-hover: #1E293B;
+    --ck-body-background: #EFF6FF;
+    --ck-body-background-transparent: rgba(239, 246, 255, 0);
+    --ck-body-background-secondary: #DBEAFE;
+    --ck-body-background-secondary-hover-background: #BFDBFE;
+    --ck-body-background-secondary-hover-outline: #2563EB;
     --ck-body-background-tertiary: #FFFFFF;
     --ck-tertiary-border-radius: 12px;
     --ck-tertiary-box-shadow: 0 4px 16px rgba(74, 144, 226, 0.2);
@@ -143,6 +143,45 @@
     --ck-graphic-primary-background: #FFFFFF;
     --ck-graphic-compass-background: #FFFFFF;
     --ck-siwe-border: #B8D4ED;
+}
+
+/* Force white text on connect buttons */
+[data-ck] button {
+  color: #FFFFFF !important;
+}
+
+/* ConnectKit modal styling for light blue theme */
+[data-ck] {
+  --ck-modal-background: #EFF6FF;
+  --ck-modal-h1-color: #1E293B;
+  --ck-modal-h2-color: #64748B;
+}
+
+/* ConnectKit wallet modal background */
+[data-ck] [data-testid="ck-modal-content"] {
+  background: #EFF6FF !important;
+}
+
+/* ConnectKit wallet option buttons */
+[data-ck] [data-testid="ck-wallet-option"] {
+  background: #FFFFFF !important;
+  border: 2px solid #2563EB !important;
+  color: #1E293B !important;
+}
+
+[data-ck] [data-testid="ck-wallet-option"]:hover {
+  background: #DBEAFE !important;
+}
+
+/* ConnectKit primary button (Continue with Family) */
+[data-ck] [data-testid="ck-primary-button"] {
+  background: #2563EB !important;
+  color: #FFFFFF !important;
+}
+
+/* ConnectKit text colors */
+[data-ck] h1, [data-ck] h2, [data-ck] h3, [data-ck] p, [data-ck] span {
+  color: #1E293B !important;
 }
 
 .dark {

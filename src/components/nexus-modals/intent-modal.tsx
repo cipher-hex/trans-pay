@@ -77,13 +77,13 @@ const IntentModal: React.FC<IntentModalProps> = ({
       open={!!intentModal}
       onOpenChange={(isOpen) => !isOpen && handleDeny()}
     >
-      <DialogContent className="w-[28rem] bg-accent-foreground border-none !shadow-[var(--ck-modal-box-shadow)] !rounded-[var(--ck-connectbutton-border-radius)] gap-y-3">
+      <DialogContent className="w-[28rem] bg-white border-none !shadow-[var(--ck-modal-box-shadow)] !rounded-[var(--ck-connectbutton-border-radius)] gap-y-3">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-[#1E293B]">
             <TrendingUp className="w-5 h-5" />
             Confirm Transaction
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-[#64748B]">
             Please review the details of this transaction carefully.
           </DialogDescription>
         </DialogHeader>
@@ -253,18 +253,16 @@ const IntentModal: React.FC<IntentModalProps> = ({
         <DialogFooter className="w-11/12 pt-4 mx-auto">
           <div className="flex w-full justify-center items-center gap-4">
             <Button
-              variant="connectkit"
               onClick={handleDeny}
-              className="bg-destructive/50 font-semibold w-1/2 text-muted-foreground"
+              className="bg-[#EF4444] hover:bg-[#374151] font-semibold w-1/2 text-white transition-colors"
             >
               Deny
             </Button>
             <Button
-              variant="connectkit"
               onClick={handleAllow}
               disabled={isRefreshing}
               className={cn(
-                "font-semibold w-1/2 text-muted-foreground",
+                "bg-[#2563EB] hover:bg-[#374151] font-semibold w-1/2 text-white transition-colors",
                 isRefreshing && "bg-gray-500 cursor-not-allowed",
               )}
             >

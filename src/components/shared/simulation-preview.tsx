@@ -43,16 +43,28 @@ export const SimulationPreview: React.FC<SimulationPreviewProps> = ({
   };
 
   if (simulationError) {
+    // Check if it's a "CA not applicable" info message
+    const isInfoMessage = simulationError.toLowerCase().includes("sufficient balance on the destination chain");
+    
     return (
       <Card
         className={cn(
-          "border-none !shadow-[var(--ck-tertiary-box-shadow)] !rounded-[var(--ck-tertiary-border-radius)] bg-destructive/30",
+          "border-none !shadow-[var(--ck-tertiary-box-shadow)] !rounded-[var(--ck-tertiary-border-radius)]",
+          isInfoMessage ? "bg-[#EFF6FF] border-2 border-[#2563EB]" : "bg-destructive/30",
           className,
         )}
       >
         <CardContent className="p-4">
-          <div className="text-destructive text-sm font-bold">
-            {simulationError}
+          <div className={cn(
+            "text-sm font-semibold flex items-start gap-2",
+            isInfoMessage ? "text-[#2563EB]" : "text-destructive"
+          )}>
+            {isInfoMessage && (
+              <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            )}
+            <span>{simulationError}</span>
           </div>
         </CardContent>
       </Card>

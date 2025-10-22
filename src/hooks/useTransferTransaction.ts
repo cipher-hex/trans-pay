@@ -17,6 +17,7 @@ interface TransferParams {
   amount: string;
   chainId: SUPPORTED_CHAINS_IDS;
   recipient: `0x${string}`;
+  sourceChains?: number[];
 }
 
 const isAllowanceRejectionError = (error: unknown): boolean => {
@@ -50,7 +51,7 @@ export const useTransferTransaction = () => {
    */
   const executeTransfer = useCallback(
     async (transferParams: TransferParams) => {
-      const { token, amount, chainId, recipient } = transferParams;
+      const { token, amount, chainId, recipient, sourceChains } = transferParams;
 
       if (!token || !amount || !chainId || !recipient || !nexusSdk) {
         const errorMsg = "Missing required parameters for transfer transaction";
@@ -65,6 +66,7 @@ export const useTransferTransaction = () => {
           amount,
           chainId,
           recipient,
+          ...(sourceChains && sourceChains.length > 0 && { sourceChains }),
         });
         resetProgress();
 
@@ -125,7 +127,7 @@ export const useTransferTransaction = () => {
    */
   const runTransferSimulation = useCallback(
     async (transferParams: TransferParams) => {
-      const { token, amount, chainId, recipient } = transferParams;
+      const { token, amount, chainId, recipient, sourceChains } = transferParams;
 
       if (
         !token ||
@@ -150,16 +152,27 @@ export const useTransferTransaction = () => {
             amount,
             chainId,
             recipient,
+            ...(sourceChains && sourceChains.length > 0 && { sourceChains }),
           });
 
         console.log("transfer sim", result);
+        console.log("sourceChains param:", sourceChains);
 
         setSimulation(result);
       } catch (error) {
         console.error("Transfer simulation failed:", error);
-        setSimulationError(
-          error instanceof Error ? error.message : "Simulation failed",
-        );
+        
+        // Handle "CA not applicable" error with user-friendly message
+        let errorMessage = "Simulation failed";
+        if (error instanceof Error) {
+          if (error.message.toLowerCase().includes("ca not applicable")) {
+            errorMessage = "You have sufficient balance on the destination chain for a direct transfer. No cross-chain routing needed.";
+          } else {
+            errorMessage = error.message;
+          }
+        }
+        
+        setSimulationError(errorMessage);
         setSimulation(null);
       } finally {
         setIsSimulating(false);

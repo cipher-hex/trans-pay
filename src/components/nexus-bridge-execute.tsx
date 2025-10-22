@@ -580,8 +580,7 @@ const NexusBridgeAndExecute = ({ isTestnet }: { isTestnet: boolean }) => {
         <Button
           onClick={handleSubmit}
           disabled={!canSubmit || isExecuting}
-          className="w-full font-semibold  bg-accent-foreground"
-          variant="connectkit"
+          className="w-full font-semibold bg-[#2563EB] text-white hover:bg-[#374151] transition-colors"
         >
           {isExecuting
             ? "Processing..."

@@ -138,10 +138,10 @@ const AllowanceModal: React.FC<AllowanceModalProps> = ({
       open={!!allowanceModal}
       onOpenChange={(isOpen) => !isOpen && handleDeny()}
     >
-      <DialogContent className="w-md bg-accent-foreground !shadow-[var(--ck-modal-box-shadow)] !rounded-[var(--ck-connectbutton-border-radius)] border-none">
+      <DialogContent className="w-md bg-white !shadow-[var(--ck-modal-box-shadow)] !rounded-[var(--ck-connectbutton-border-radius)] border-none">
         <DialogHeader>
-          <DialogTitle>Set Token Allowances</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-[#1E293B]">Set Token Allowances</DialogTitle>
+          <DialogDescription className="text-[#64748B]">
             The following token allowances are required for this transaction.
             Please approve them.
           </DialogDescription>
@@ -153,7 +153,7 @@ const AllowanceModal: React.FC<AllowanceModalProps> = ({
               className="p-3 border !rounded-[var(--ck-connectbutton-border-radius)]"
             >
               <div className="flex items-center gap-x-2">
-                <p className="font-semibold">
+                <p className="font-semibold text-[#1E293B]">
                   Token: {source.token.symbol} on {source.chain.name}
                 </p>
                 <Image
@@ -163,18 +163,18 @@ const AllowanceModal: React.FC<AllowanceModalProps> = ({
                   height={20}
                 />
               </div>
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex justify-between items-center text-sm text-[#64748B]">
                 <span>Current Allowance</span>
-                <span className="font-bold">
+                <span className="font-bold text-[#1E293B]">
                   {nexusSdk?.utils.formatBalance(
                     source.allowance.current,
                     source.token.decimals,
                   )}
                 </span>
               </div>
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex justify-between items-center text-sm text-[#64748B]">
                 <span>Required Allowance</span>
-                <span className="font-bold">
+                <span className="font-bold text-[#1E293B]">
                   {nexusSdk?.utils.formatBalance(
                     source.allowance.minimum,
                     source.token.decimals,
@@ -191,7 +191,7 @@ const AllowanceModal: React.FC<AllowanceModalProps> = ({
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="min" id={`min-${index}`} />
-                  <Label htmlFor={`min-${index}`}>
+                  <Label htmlFor={`min-${index}`} className="text-[#1E293B]">
                     Minimum (
                     {nexusSdk?.utils.formatBalance(
                       source.allowance.minimum,
@@ -202,11 +202,11 @@ const AllowanceModal: React.FC<AllowanceModalProps> = ({
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="max" id={`max-${index}`} />
-                  <Label htmlFor={`max-${index}`}>Maximum (Unlimited)</Label>
+                  <Label htmlFor={`max-${index}`} className="text-[#1E293B]">Maximum (Unlimited)</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="custom" id={`custom-${index}`} />
-                  <Label htmlFor={`custom-${index}`}>Custom Amount</Label>
+                  <Label htmlFor={`custom-${index}`} className="text-[#1E293B]">Custom Amount</Label>
                 </div>
               </RadioGroup>
 
@@ -233,16 +233,14 @@ const AllowanceModal: React.FC<AllowanceModalProps> = ({
         </div>
         <DialogFooter className="gap-2 sm:justify-end mt-4">
           <Button
-            variant="connectkit"
             onClick={handleDeny}
-            className="bg-destructive/50 font-semibold"
+            className="bg-[#EF4444] hover:bg-[#374151] font-semibold text-white transition-colors"
           >
             Deny
           </Button>
           <Button
-            variant="connectkit"
             onClick={handleApprove}
-            className="font-semibold"
+            className="bg-[#2563EB] hover:bg-[#374151] font-semibold text-white transition-colors"
           >
             Approve Selected
           </Button>
