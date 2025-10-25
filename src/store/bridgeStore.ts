@@ -42,6 +42,7 @@ interface BridgeActions {
   setSelectedChain: (chainId: SUPPORTED_CHAINS_IDS) => void;
   setSelectedToken: (token: SUPPORTED_TOKENS | undefined) => void;
   setBridgeAmount: (amount: string) => void;
+  setSourceChains: (chains: SUPPORTED_CHAINS_IDS[]) => void;
   resetForm: () => void;
 
   // Balance actions
@@ -81,6 +82,7 @@ const initialState: BridgeState = {
     selectedChain: SUPPORTED_CHAINS.ETHEREUM,
     selectedToken: undefined,
     bridgeAmount: "",
+    sourceChains: [] as SUPPORTED_CHAINS_IDS[],
   },
   availableBalance: [],
   simulation: null,
@@ -118,6 +120,12 @@ export const useBridgeStore = create<BridgeStore>()(
       setBridgeAmount: (amount) =>
         set((state) => {
           state.form.bridgeAmount = amount;
+          state.error = null;
+        }),
+
+      setSourceChains: (chains) =>
+        set((state) => {
+          state.form.sourceChains = chains;
           state.error = null;
         }),
 
@@ -254,12 +262,16 @@ const getCompletedStepsCount = (progressSteps: ComponentStep[]): number => {
   return cachedCompletedStepsCount;
 };
 
+// Memoized empty array to prevent infinite loops
+const EMPTY_CHAINS: SUPPORTED_CHAINS_IDS[] = [];
+
 export const bridgeSelectors = {
   // Form selectors
   form: (state: BridgeStore) => state.form,
   selectedChain: (state: BridgeStore) => state.form.selectedChain,
   selectedToken: (state: BridgeStore) => state.form.selectedToken,
   bridgeAmount: (state: BridgeStore) => state.form.bridgeAmount,
+  sourceChains: (state: BridgeStore) => state.form.sourceChains ?? EMPTY_CHAINS,
 
   // Balance selectors
   availableBalance: (state: BridgeStore) => state.availableBalance,

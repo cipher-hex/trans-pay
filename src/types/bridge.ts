@@ -16,6 +16,7 @@ export interface BridgeFormData {
   selectedChain: SupportedChainId;
   selectedToken: SupportedToken | undefined;
   bridgeAmount: string;
+  sourceChains?: SupportedChainId[];
 }
 
 export interface BridgeState extends BridgeFormData {

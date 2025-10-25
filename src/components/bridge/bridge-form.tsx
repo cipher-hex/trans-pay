@@ -12,6 +12,8 @@ import ChainSelect from "../blocks/chain-select";
 import TokenSelect from "../blocks/token-select";
 import { SimulationPreview } from "../shared/simulation-preview";
 import { UserAsset } from "@avail-project/nexus-core";
+import { SourceChainSelector } from "../blocks/source-chain-selector";
+import { useSourceChainBalances } from "@/hooks/useSourceChainBalances";
 
 interface BridgeFormProps {
   isTestnet: boolean;
@@ -48,6 +50,18 @@ export const BridgeForm: React.FC<BridgeFormProps> = ({
   const simulationError = useBridgeStore(bridgeSelectors.simulationError);
   const error = useBridgeStore(bridgeSelectors.error);
 
+  // Source chain selection
+  const sourceChains = useBridgeStore(bridgeSelectors.sourceChains);
+  const setSourceChains = useBridgeStore((state) => state.setSourceChains);
+
+  // Get source chain balances
+  const { availableChains, isLoading: isLoadingBalances } =
+    useSourceChainBalances({
+      selectedToken,
+      destinationChainId: selectedChain,
+      isTestnet,
+    });
+
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (canSubmit && !isSubmitting) {
@@ -76,6 +90,20 @@ export const BridgeForm: React.FC<BridgeFormProps> = ({
         />
       </div>
 
+      {/* Source Chain Selection */}
+      {selectedToken && (
+        <div className="space-y-2">
+          <SourceChainSelector
+            selectedChainIds={sourceChains.map((chain) => Number(chain))}
+            onSelectionChange={(chainIds) => setSourceChains(chainIds as any)}
+            availableChains={availableChains}
+            destinationChainId={selectedChain}
+            tokenSymbol=""
+            disabled={isSubmitting}
+          />
+        </div>
+      )}
+
       {/* Amount Input */}
       <div className="space-y-2">
         <div className="relative">
@@ -88,7 +116,7 @@ export const BridgeForm: React.FC<BridgeFormProps> = ({
               disabled={!selectedToken || isSubmitting}
               className={cn(
                 "border-none focus-visible:ring-0 focus-visible:ring-offset-0",
-                validation.errorMessage ? "border-red-500" : "",
+                validation.errorMessage ? "border-red-500" : ""
               )}
             />
           </div>
@@ -146,9 +174,7 @@ export const BridgeForm: React.FC<BridgeFormProps> = ({
         className="w-full font-semibold"
         disabled={!submissionState.ready || isSubmitting}
       >
-        {isSubmitting
-          ? "Processing..."
-          : (submissionState.reason ?? "Continue")}
+        {isSubmitting ? "Processing..." : submissionState.reason ?? "Continue"}
       </Button>
     </form>
   );

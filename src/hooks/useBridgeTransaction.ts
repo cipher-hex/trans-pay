@@ -35,6 +35,7 @@ export const useBridgeTransaction = () => {
   const selectedChain = useBridgeStore(bridgeSelectors.selectedChain);
   const selectedToken = useBridgeStore(bridgeSelectors.selectedToken);
   const bridgeAmount = useBridgeStore(bridgeSelectors.bridgeAmount);
+  const sourceChains = useBridgeStore(bridgeSelectors.sourceChains);
   const isBridging = useBridgeStore(bridgeSelectors.isBridging);
   const simulation = useBridgeStore(bridgeSelectors.simulation);
   const isSimulating = useBridgeStore(bridgeSelectors.isSimulating);
@@ -80,6 +81,7 @@ export const useBridgeTransaction = () => {
         chainId: selectedChain,
         token: selectedToken,
         amount: bridgeAmount,
+        ...(sourceChains && sourceChains.length > 0 && { sourceChains }),
       });
 
       if (!result?.success) {
@@ -205,6 +207,7 @@ export const useBridgeTransaction = () => {
         chainId: selectedChain,
         token: selectedToken,
         amount: bridgeAmount,
+        ...(sourceChains && sourceChains.length > 0 && { sourceChains }),
       });
 
       console.log("Simulation result:", result);
@@ -234,6 +237,7 @@ export const useBridgeTransaction = () => {
     selectedToken,
     bridgeAmount,
     selectedChain,
+    sourceChains,
     nexusSdk,
     setSimulating,
     setSimulationError,
@@ -261,7 +265,7 @@ export const useBridgeTransaction = () => {
         clearTimeout(simulationTimeoutRef.current);
       }
     };
-  }, [selectedToken, bridgeAmount, selectedChain, runSimulation]);
+  }, [selectedToken, bridgeAmount, selectedChain, sourceChains, runSimulation]);
 
   /**
    * Manual simulation trigger
