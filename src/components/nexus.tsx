@@ -11,6 +11,7 @@ import NexusContentWrapper from "./blocks/nexus-content-wrapper";
 import NexusTransfer from "./nexus-transfer";
 import NexusBridge from "./bridge/nexus-bridge";
 import NexusBridgeAndExecute from "./nexus-bridge-execute";
+import CreatePaymentRequest from "./payment-request/create-payment-request";
 
 interface NexusProps {
   isTestnet: boolean;
@@ -42,6 +43,7 @@ const Nexus = ({ isTestnet, activeTab }: NexusProps) => {
               {activeTab === "unified-balance" && <UnifiedBalance />}
               {activeTab === "bridge" && <NexusBridge isTestnet={isTestnet} />}
               {activeTab === "transfer" && <NexusTransfer isTestnet={isTestnet} />}
+              {activeTab === "payment-request" && <CreatePaymentRequest isTestnet={isTestnet} />}
               {activeTab === "bridge-execute" && !isTestnet && <NexusBridgeAndExecute isTestnet={isTestnet} />}
             </NexusContentWrapper>
           </div>

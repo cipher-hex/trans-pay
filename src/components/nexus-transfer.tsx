@@ -19,6 +19,19 @@ import { useSourceChainBalances } from "@/hooks/useSourceChainBalances";
 import { SimulationPreview } from "./shared/simulation-preview";
 import IntentModal from "./nexus-modals/intent-modal";
 import AllowanceModal from "./nexus-modals/allowance-modal";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Label } from "./ui/label";
+import { Badge } from "./ui/badge";
+import { AlertTriangle, CheckCircle, Search } from "lucide-react";
+import { useGetPaymentRequest, useMarkPaymentAsPaid } from "@/hooks/usePaymentRequest";
+import { 
+  formatPaymentId, 
+  parsePaymentId, 
+  getTokenInfo, 
+  POLYGON_CHAIN_ID,
+  PAYMENT_STATUS_LABELS 
+} from "@/constants/paymentRequest";
+import { PaymentStatus, PaymentLoadingState } from "@/types/payment-request";
 
 interface TransferState {
   selectedChain: SUPPORTED_CHAINS_IDS;
@@ -27,6 +40,8 @@ interface TransferState {
   amount: string;
   isTransferring: boolean;
   selectedSourceChains: number[];
+  paymentLoading: PaymentLoadingState;
+  isPaymentMode: boolean;
 }
 
 const NexusTransfer = ({ isTestnet }: { isTestnet: boolean }) => {
@@ -37,6 +52,13 @@ const NexusTransfer = ({ isTestnet }: { isTestnet: boolean }) => {
     amount: "",
     isTransferring: false,
     selectedSourceChains: [],
+    paymentLoading: {
+      paymentId: "",
+      isLoading: false,
+      data: null,
+      error: null,
+    },
+    isPaymentMode: false,
   });
   const {
     nexusSdk,
@@ -60,6 +82,10 @@ const NexusTransfer = ({ isTestnet }: { isTestnet: boolean }) => {
     destinationChainId: state.selectedChain,
     isTestnet,
   });
+
+  // Payment request hooks
+  const { getPaymentRequest } = useGetPaymentRequest(null, isTestnet);
+  const { markAsPaid, isMarking } = useMarkPaymentAsPaid(isTestnet);
 
   useTransactionProgress({
     transactionType: "transfer",
@@ -119,6 +145,135 @@ const NexusTransfer = ({ isTestnet }: { isTestnet: boolean }) => {
     setState({ ...state, selectedSourceChains: chainIds });
   };
 
+  // Payment ID handlers
+  const handlePaymentIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setState(prevState => ({
+      ...prevState,
+      paymentLoading: {
+        ...prevState.paymentLoading,
+        paymentId: e.target.value,
+        error: null,
+      },
+    }));
+  };
+
+  const loadPaymentRequest = async () => {
+    const paymentIdInput = state.paymentLoading.paymentId;
+    if (!paymentIdInput.trim()) {
+      toast.error("Please enter a payment ID");
+      return;
+    }
+
+    // Parse payment ID (handle both formatted and raw numbers)
+    const parsedId = parsePaymentId(paymentIdInput) || parseInt(paymentIdInput, 10);
+    if (isNaN(parsedId) || parsedId <= 0) {
+      setState(prevState => ({
+        ...prevState,
+        paymentLoading: {
+          ...prevState.paymentLoading,
+          error: "Invalid payment ID format",
+        },
+      }));
+      return;
+    }
+
+    setState(prevState => ({
+      ...prevState,
+      paymentLoading: {
+        ...prevState.paymentLoading,
+        isLoading: true,
+        error: null,
+      },
+    }));
+
+    try {
+      const result = await getPaymentRequest(parsedId);
+      
+      if (!result.success) {
+        setState(prevState => ({
+          ...prevState,
+          paymentLoading: {
+            ...prevState.paymentLoading,
+            isLoading: false,
+            error: result.error || "Failed to load payment request",
+          },
+        }));
+        return;
+      }
+
+      if (!result.data) {
+        setState(prevState => ({
+          ...prevState,
+          paymentLoading: {
+            ...prevState.paymentLoading,
+            isLoading: false,
+            error: "Payment request not found",
+          },
+        }));
+        return;
+      }
+
+      // Get token info for mapping
+      const tokenInfo = getTokenInfo("USDC", isTestnet); // Default to USDC, we'll need to detect the actual token
+      const isUSDT = result.data.token.toLowerCase() === getTokenInfo("USDT", isTestnet).address.toLowerCase();
+      const detectedToken = isUSDT ? "USDT" : "USDC";
+
+      // Format the payment data
+      const formattedData = {
+        ...result.data,
+        formattedAmount: (parseFloat(result.data.amount) / 1000000).toString(), // Convert from wei (6 decimals)
+        tokenSymbol: detectedToken as any,
+        createdAt: new Date(result.data.timestamp * 1000),
+        paidAtDate: result.data.paidAt ? new Date(result.data.paidAt * 1000) : null,
+        statusLabel: PAYMENT_STATUS_LABELS[result.data.status],
+        isActive: result.data.status === PaymentStatus.Pending,
+      };
+
+      setState(prevState => ({
+        ...prevState,
+        // Auto-fill form with payment data
+        selectedChain: POLYGON_CHAIN_ID, // Always Polygon for payments
+        selectedToken: detectedToken as any,
+        recipientAddress: result.data.merchant,
+        amount: formattedData.formattedAmount,
+        isPaymentMode: true,
+        paymentLoading: {
+          ...prevState.paymentLoading,
+          isLoading: false,
+          data: formattedData,
+          error: null,
+        },
+      }));
+
+      toast.success("Payment request loaded successfully!", {
+        description: `${formattedData.formattedAmount} ${detectedToken} to ${result.data.merchant.slice(0, 8)}...`,
+      });
+    } catch (error: any) {
+      console.error("Error loading payment request:", error);
+      setState(prevState => ({
+        ...prevState,
+        paymentLoading: {
+          ...prevState.paymentLoading,
+          isLoading: false,
+          error: error.message || "Unexpected error loading payment request",
+        },
+      }));
+    }
+  };
+
+  const clearPaymentMode = () => {
+    setState(prevState => ({
+      ...prevState,
+      isPaymentMode: false,
+      paymentLoading: {
+        paymentId: "",
+        isLoading: false,
+        data: null,
+        error: null,
+      },
+    }));
+  };
+
   const handleTransfer = async () => {
     if (
       !state.selectedToken ||
@@ -158,12 +313,35 @@ const NexusTransfer = ({ isTestnet }: { isTestnet: boolean }) => {
       console.log("result", result);
 
       if (result.success) {
+        // If this was a payment request fulfillment, mark it as paid
+        if (state.isPaymentMode && state.paymentLoading.data) {
+          try {
+            const paymentId = parsePaymentId(state.paymentLoading.paymentId) || parseInt(state.paymentLoading.paymentId, 10);
+            if (!isNaN(paymentId) && paymentId > 0) {
+              await markAsPaid(paymentId, state.recipientAddress);
+              toast.success("Payment fulfilled successfully!", {
+                description: `Payment request ${formatPaymentId(paymentId)} has been marked as paid`,
+              });
+            }
+          } catch (error) {
+            console.error("Error marking payment as paid:", error);
+            // Don't show error to user as the transfer was successful
+          }
+        }
+
         // Clear form on successful transfer
         setState({
           ...state,
           amount: "",
           recipientAddress: undefined,
           isTransferring: false,
+          isPaymentMode: false,
+          paymentLoading: {
+            paymentId: "",
+            isLoading: false,
+            data: null,
+            error: null,
+          },
         });
       }
     } catch (error: unknown) {
@@ -175,17 +353,130 @@ const NexusTransfer = ({ isTestnet }: { isTestnet: boolean }) => {
 
   return (
     <div className="flex flex-col gap-y-4 py-4">
+      {/* Payment ID Section */}
+      <Card className="border-none py-3 !shadow-[var(--ck-connectbutton-box-shadow)] !rounded-[var(--ck-connectbutton-border-radius)] bg-accent-foreground">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Search className="w-5 h-5" />
+            Pay with Payment ID (Optional)
+          </CardTitle>
+          <CardDescription>
+            Enter a payment ID to auto-fill transfer details for a payment request
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <Input
+                placeholder="Enter payment ID (e.g., #000042 or 42)"
+                value={state.paymentLoading.paymentId}
+                onChange={handlePaymentIdChange}
+                disabled={state.paymentLoading.isLoading}
+                className="border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+            </div>
+            <Button
+              onClick={loadPaymentRequest}
+              disabled={state.paymentLoading.isLoading || !state.paymentLoading.paymentId.trim()}
+              variant="outline"
+              className="px-4"
+            >
+              {state.paymentLoading.isLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Load"
+              )}
+            </Button>
+          </div>
+          
+          {/* Error State */}
+          {state.paymentLoading.error && (
+            <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-red-500" />
+              <span className="text-sm text-red-700">{state.paymentLoading.error}</span>
+            </div>
+          )}
+
+          {/* Payment Data Display */}
+          {state.paymentLoading.data && (
+            <div className="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-md">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <span className="font-semibold text-green-800">Payment Request Loaded</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearPaymentMode}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  Clear
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <Label className="text-gray-600">Payment ID</Label>
+                  <div className="font-mono">{formatPaymentId(parsePaymentId(state.paymentLoading.paymentId) || 0)}</div>
+                </div>
+                <div>
+                  <Label className="text-gray-600">Status</Label>
+                  <div>
+                    <Badge 
+                      variant={state.paymentLoading.data.status === PaymentStatus.Pending ? "default" : 
+                              state.paymentLoading.data.status === PaymentStatus.Paid ? "secondary" : 
+                              "destructive"}
+                      className="text-xs"
+                    >
+                      {state.paymentLoading.data.statusLabel}
+                    </Badge>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-gray-600">Amount</Label>
+                  <div>{state.paymentLoading.data.formattedAmount} {state.paymentLoading.data.tokenSymbol}</div>
+                </div>
+                <div>
+                  <Label className="text-gray-600">Merchant</Label>
+                  <div className="font-mono text-xs">
+                    {state.paymentLoading.data.merchant.slice(0, 8)}...{state.paymentLoading.data.merchant.slice(-6)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Warning for non-pending payments */}
+              {state.paymentLoading.data.status !== PaymentStatus.Pending && (
+                <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-yellow-600" />
+                    <span className="text-sm text-yellow-800">
+                      {state.paymentLoading.data.status === PaymentStatus.Paid 
+                        ? "This payment request has already been fulfilled"
+                        : "This payment request has been cancelled"
+                      }
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
       <div className="w-full space-y-4">
         <ChainSelect
           selectedChain={state.selectedChain}
           handleSelect={handleChainSelect}
           isTestnet={isTestnet}
+          disabled={state.isPaymentMode}
+          chainLabel={state.isPaymentMode ? "Destination Chain (Auto-filled)" : undefined}
         />
         <TokenSelect
           selectedToken={state.selectedToken}
           selectedChain={state.selectedChain.toString()}
           handleTokenSelect={handleTokenSelect}
           isTestnet={isTestnet}
+          disabled={state.isPaymentMode}
         />
         {/* Source Chain Selector - shown only when token is selected */}
         {state.selectedToken && availableChains.length > 0 && (
@@ -202,7 +493,7 @@ const NexusTransfer = ({ isTestnet }: { isTestnet: boolean }) => {
       <div className="w-full flex items-center gap-x-2 shadow-[var(--ck-connectbutton-box-shadow)] rounded-[var(--ck-connectbutton-border-radius)]">
         <Input
           type="text"
-          placeholder="Recipient address"
+          placeholder={state.isPaymentMode ? "Merchant address (auto-filled)" : "Recipient address"}
           className="border-none focus-visible:ring-0 focus-visible:ring-offset-0"
           value={
             state.recipientAddress
@@ -210,17 +501,17 @@ const NexusTransfer = ({ isTestnet }: { isTestnet: boolean }) => {
               : ""
           }
           onChange={handleRecipientAddressChange}
-          disabled={!state.selectedToken}
+          disabled={!state.selectedToken || state.isPaymentMode}
         />
       </div>
       <div className="w-full flex items-center gap-x-2 shadow-[var(--ck-connectbutton-box-shadow)] rounded-[var(--ck-connectbutton-border-radius)]">
         <Input
           type="text"
-          placeholder="Amount"
+          placeholder={state.isPaymentMode ? "Payment amount (auto-filled)" : "Amount"}
           className="border-none focus-visible:ring-0 focus-visible:ring-offset-0"
           value={state.amount}
           onChange={handleAmountChange}
-          disabled={!state.selectedToken}
+          disabled={!state.selectedToken || state.isPaymentMode}
         />
       </div>
 
@@ -242,12 +533,15 @@ const NexusTransfer = ({ isTestnet }: { isTestnet: boolean }) => {
         variant="connectkit"
         className="w-full font-semibold"
         onClick={handleTransfer}
-        disabled={!isValidTransferAmount || state.isTransferring}
+        disabled={!isValidTransferAmount || state.isTransferring || isMarking}
       >
-        {state.isTransferring ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
+        {state.isTransferring || isMarking ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            {state.isPaymentMode ? "Fulfilling Payment..." : "Transferring..."}
+          </>
         ) : (
-          "Continue"
+          state.isPaymentMode ? "Fulfill Payment Request" : "Continue"
         )}
       </Button>
       {intentModal && (

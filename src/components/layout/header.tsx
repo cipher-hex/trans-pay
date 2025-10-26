@@ -15,6 +15,7 @@ const Header = ({ activeTab, onTabChange, isTestnet }: HeaderProps) => {
     { value: "unified-balance", label: "Unified Balance" },
     { value: "bridge", label: "Bridge" },
     { value: "transfer", label: "Transfer" },
+    { value: "payment-request", label: "Payment Request" },
     ...(!isTestnet ? [{ value: "bridge-execute", label: "Bridge & Execute" }] : [])
   ];
 
