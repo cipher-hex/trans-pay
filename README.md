@@ -1,15 +1,17 @@
-# Avail Nexus SDK Demo
+# Trans-Pay - Cross-Chain Payment Request System
 
-A comprehensive demonstration application showcasing the capabilities of the [Avail Nexus SDK](https://www.npmjs.com/package/@avail-project/nexus-core) for cross-chain interactions and asynchronous composability on blockchain networks.
+A comprehensive payment request and cross-chain transfer application built with the [Avail Nexus SDK](https://www.npmjs.com/package/@avail-project/nexus-core), enabling merchants to create payment requests and customers to pay from any supported blockchain network.
 
 ## 🌟 Overview
 
-This demo application demonstrates the power of the Avail Nexus SDK, enabling seamless communication and information sharing among diverse application chains. It showcases scenarios where transactions can occur on one chain while related operations happen on different chains, highlighting the exciting possibilities of asynchronous blockchain composability.
+Trans-Pay demonstrates the power of cross-chain payment requests and transfers using the Avail Nexus SDK. Merchants can create payment requests on their preferred blockchain, and customers can fulfill these payments from any supported network. The application showcases seamless cross-chain composability for decentralized payments.
 
 ### Key Features
 
+- **💳 Payment Requests**: Create on-chain payment requests with unique IDs for any supported blockchain
+- **🌐 Multi-Chain Support**: Accept payments on Ethereum, Polygon, Optimism, Arbitrum, Base, BNB, and Avalanche
 - **🌉 Cross-Chain Bridging**: Transfer tokens between supported blockchain networks
-- **💸 Token Transfers**: Send tokens to any address across different chains
+- **💸 Token Transfers**: Send tokens to any address across different chains with payment ID support
 - **📋 Smart Contract Interactions**: Execute arbitrary smart contract functions with cost estimation
 - **📊 Transaction History**: Track and monitor all your transactions with real-time status updates
 - **👛 Multi-Wallet Support**: Connect with various wallets using ConnectKit integration
@@ -18,19 +20,23 @@ This demo application demonstrates the power of the Avail Nexus SDK, enabling se
 
 ## 🏗️ Architecture
 
-The application demonstrates three core functionalities of the Nexus SDK:
+The application demonstrates four core functionalities of the Nexus SDK:
 
-### 1. Bridge Operations
+### 1. Payment Request System
+
+Merchants create on-chain payment requests with unique IDs on their chosen blockchain. Payment requests include merchant address, token type (USDC/USDT), amount, and destination chain. Customers can search by payment ID and fulfill requests from any supported network.
+
+### 2. Bridge Operations
 
 Cross-chain token bridging with automatic route optimization and cost estimation.
 
-### 2. Transfer Operations
+### 3. Transfer Operations
 
-Direct token transfers with recipient validation and gas estimation.
+Direct token transfers with recipient validation, gas estimation, and payment ID support for fulfilling payment requests.
 
-### 3. Deposit Operations
+### 4. Smart Contract Execution
 
-Smart contract interactions with ABI parsing, function simulation, and execution.
+Smart contract interactions with ABI parsing, function simulation, and execution combined with cross-chain bridging.
 
 ## 🚀 Getting Started
 

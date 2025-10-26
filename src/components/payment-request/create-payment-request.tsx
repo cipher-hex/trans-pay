@@ -25,6 +25,17 @@ import {
   SupportedPaymentToken 
 } from "@/types/payment-request";
 
+// Supported chains for payment requests
+const SUPPORTED_CHAINS = [
+  { id: 1, name: "Ethereum", symbol: "ETH", icon: "⟠" },
+  { id: 10, name: "Optimism", symbol: "ETH", icon: "🔴" },
+  { id: 137, name: "Polygon", symbol: "MATIC", icon: "⬣" },
+  { id: 42161, name: "Arbitrum", symbol: "ETH", icon: "🔵" },
+  { id: 43114, name: "Avalanche", symbol: "AVAX", icon: "🔺" },
+  { id: 8453, name: "Base", symbol: "ETH", icon: "🔵" },
+  { id: 56, name: "BNB", symbol: "BNB", icon: "🟡" },
+] as const;
+
 interface CreatePaymentRequestProps extends PaymentRequestComponentProps {
   className?: string;
 }
@@ -37,10 +48,11 @@ const CreatePaymentRequest: React.FC<CreatePaymentRequestProps> = ({
 }) => {
   const { address, isConnected } = useAccount();
   
-  // Form state
-  const [formData, setFormData] = useState<PaymentRequestFormData>({
+  // Form state (extended with chain selection)
+  const [formData, setFormData] = useState({
     merchantAddress: "" as `0x${string}`,
-    selectedToken: "USDC",
+    selectedChain: 137, // Default to Polygon
+    selectedToken: "USDC" as SupportedPaymentToken,
     requestedAmount: "",
   });
 
@@ -70,6 +82,11 @@ const CreatePaymentRequest: React.FC<CreatePaymentRequestProps> = ({
       errors.merchantAddress = "Merchant address is required";
     } else if (!isAddress(formData.merchantAddress)) {
       errors.merchantAddress = "Please enter a valid Ethereum address";
+    }
+
+    // Validate chain selection
+    if (!formData.selectedChain) {
+      errors.selectedChain = "Please select a blockchain";
     }
 
     // Validate token selection
@@ -128,6 +145,7 @@ const CreatePaymentRequest: React.FC<CreatePaymentRequestProps> = ({
         // Reset form
         setFormData({
           merchantAddress: "" as `0x${string}`,
+          selectedChain: 137, // Reset to Polygon
           selectedToken: "USDC",
           requestedAmount: "",
         });
@@ -149,7 +167,7 @@ const CreatePaymentRequest: React.FC<CreatePaymentRequestProps> = ({
   }, [formData, isConnected, validateForm, createPaymentRequest, onSuccess, onError]);
 
   // Handle input changes
-  const handleInputChange = useCallback((field: keyof PaymentRequestFormData, value: string) => {
+  const handleInputChange = useCallback((field: string, value: string | number) => {
     setFormData(prev => ({
       ...prev,
       [field]: value,
@@ -277,6 +295,37 @@ const CreatePaymentRequest: React.FC<CreatePaymentRequestProps> = ({
               )}
             </div>
 
+            {/* Blockchain Selection */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Destination Blockchain</Label>
+              <Select
+                value={formData.selectedChain.toString()}
+                onValueChange={(value) => handleInputChange('selectedChain', parseInt(value))}
+              >
+                <SelectTrigger className={validationErrors.selectedChain ? 'border-red-500' : ''}>
+                  <SelectValue placeholder="Select blockchain" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SUPPORTED_CHAINS.map((chain) => (
+                    <SelectItem key={chain.id} value={chain.id.toString()}>
+                      <div className="flex items-center gap-3">
+                        <span className="text-lg">{chain.icon}</span>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{chain.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            Chain ID: {chain.id} • {chain.symbol}
+                          </span>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {validationErrors.selectedChain && (
+                <p className="text-sm text-red-600">{validationErrors.selectedChain}</p>
+              )}
+            </div>
+
             {/* Token Selection */}
             <div className="space-y-2">
               <Label className="text-sm font-semibold">Payment Token</Label>
@@ -338,7 +387,7 @@ const CreatePaymentRequest: React.FC<CreatePaymentRequestProps> = ({
               <Info className="w-4 h-4 text-blue-500" />
               <AlertDescription className="text-blue-700">
                 Payment requests are stored on-chain. Customers can pay from any supported network 
-                and the funds will arrive on Polygon.
+                and the funds will arrive on your selected blockchain.
               </AlertDescription>
             </Alert>
 
