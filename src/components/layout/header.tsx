@@ -16,17 +16,13 @@ const Header = ({ activeTab, onTabChange, isTestnet }: HeaderProps) => {
     { value: "bridge", label: "Bridge" },
     { value: "transfer", label: "Transfer" },
     { value: "payment-request", label: "Payment Request" },
-    ...(!isTestnet ? [{ value: "bridge-execute", label: "Bridge & Execute" }] : [])
   ];
 
   return (
     <header className="w-full sticky top-0 z-50 bg-white shadow-lg">
       <div className="w-full px-6 py-4">
         <div className="flex items-center justify-between mb-4">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-[#2563EB] to-[#7C3AED] rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-2xl font-bold text-white">TP</span>
-            </div>
+          <Link href="/" className="flex items-center">
             <div className="flex flex-col">
               <span className="text-xl font-semibold text-[#1E293B]">Trans-Pay</span>
               <span className="text-xs text-[#64748B]">
